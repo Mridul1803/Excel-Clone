@@ -1,0 +1,477 @@
+body{
+    margin: 0;
+    overflow: hidden;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    color: rgb(59, 59, 59);
+    height: 100vh;
+    position: relative;
+}
+
+.title{
+    background-color: #217346;
+    text-align: center;
+    font-size: 1rem;
+    padding: 0.3rem;
+    height: 4vh;
+    color: white;
+}
+
+.menu-bar{
+    display: flex;
+    flex-direction: row;
+    height: 5vh;
+    background-color: #217346;
+}
+
+.menu-bar-item{
+    background-color: #217346;
+    color: white;
+    padding: 0 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-bar-item.selected{
+    background-color: white;
+    color: #217346;
+}
+.menu-bar-item:hover{
+    background-color: #134429;
+    cursor: pointer;
+}
+.menu-bar-item.selected:hover{
+    cursor: default;
+    background-color: white;
+}
+
+.menu-icon-bar{
+    display: flex;
+    height: 6vh;
+    /* padding: 0.2rem 0; */
+    align-items: center;
+}
+
+.menu-icon{
+    padding: 0 0.5rem;
+    display: flex;
+    cursor: pointer;
+    /* justify-content: center; */
+    align-items: center;
+    height: 100%;
+}
+
+.menu-icon:hover{
+    background-color: lightgray;
+    cursor: pointer;
+}
+.material-icons{
+    color: rgb(65, 64, 64);
+}
+.menu-selector{
+    height: 4.5vh;
+    font-size: 1rem;
+    margin: 0 0.5rem;
+    /* padding: 0 0.1rem; */
+}
+
+#font-family{
+    width: 10vw;
+    min-width: 130px;
+    font-family: 'noto sans';
+}
+#font-size{
+    width: 3vw;
+    min-width: 50px;
+}
+
+.formula-bar{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 5vh;
+    padding: 0 0.5rem;
+    background-color: lightgray;
+}
+
+#selected-cell{
+    width:5vw;
+    height: 80%;
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: white;
+}
+
+#formula-sign{
+    width: 3vw;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightgray;
+}
+
+#formula-input{
+    width: 92vw;
+    height: 80%;
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: white;
+}
+
+.data-container{
+    display: flex;
+    height: 75vh;
+    width: 100vw;
+    flex-direction: row;
+    flex-wrap: wrap;
+    /* overflow-x: scroll; */
+}
+
+#select-all{
+    width: 25px;
+    height: 25px;
+    border: 1px solid;
+}
+
+#columns{
+    height: 25px;
+    width: calc(100vw - 25px);
+    /* width: 500px; */
+    border: 1px solid; 
+    display: flex;
+    overflow: hidden;
+    /* flex-wrap: nowrap; */
+    /* overflow-x: scroll; */
+}
+
+#rows{
+    width: 25px;
+    height: calc( 75vh - 25px );
+    border: 1px solid red;
+    overflow: hidden;
+}
+#cells{
+    position: relative;
+    width: calc( 100vw - 25px );
+    height: calc( 75vh - 25px );
+    border: 1px solid blue;
+    overflow: scroll;
+}
+.column-name{ 
+    width: 5vw;
+    min-width: 70px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    font-weight: bolder;
+    border-right: 1px solid lightgray;
+    /* align-items: center; */
+}
+
+.row-name{
+    min-height: 25px;
+    border-bottom: 1px solid lightgray;
+    display : flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bolder;
+}
+.cell-row{
+    display: flex;
+}
+.input-cell{
+    width: 70px;
+    min-width: 70px;
+    min-height: 25px;
+    height: 25px;
+    border-bottom: 1px solid lightgray;
+    border-right: 1px solid lightgray;
+    padding: 0 3px;
+    font-size: 14px;
+    font-family: 'Noto Sans';
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    outline-color: lightseagreen;
+}
+
+.input-cell.selected{
+    border: 2px solid lightseagreen;
+}
+
+.input-cell.top-selected{
+    border-top: none;
+}
+
+.input-cell.bottom-selected{
+    border-bottom: 1px solid lightgray;
+}
+
+.input-cell.left-selected{
+    border-left: none;
+}
+
+.input-cell.right-selected{
+    border-right: 1px solid lightgray;
+}
+
+.menu-icon.selected{
+    background-color: lightgray;
+}
+
+.input-cell:hover{
+    cursor: cell;
+}
+
+.sheet-bar{
+    display: flex;
+    height: 4vh;
+    width: 100vw;
+    align-items: center;
+}
+
+.sheet-scroller{
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.sheet-tab-container{
+    display : flex;
+    border-left: 1px solid lightgray;
+    overflow: scroll;
+}
+
+.sheet-tab-container::-webkit-scrollbar{
+    display : none;
+}
+
+.sheet-tab-container{
+    -ms-overflow-style : none;
+    scrollbar-width : none;
+}
+
+.sheet-tab{
+    display: flex;
+    justify-content: center;
+    padding: 0 10px;
+    padding-top: 3px;
+    height: 4vh;
+    border-right: 1px solid lightgray;
+    font-weight: bolder ;
+}
+
+.sheet-tab.selected{
+    color: #217346;
+    border-bottom : 5px solid #217346;
+}
+
+.sheet-tab:hover{
+    background-color: lightgray;
+    cursor: pointer;
+}
+
+.sheet-tab.selected:hover{
+    background-color: white;
+    cursor:default;
+}
+
+.add-sheet{
+    color: #217346;
+    margin-right: 10px;
+}
+
+.add-sheet:hover{
+    cursor: pointer;
+    transform: scale(1.20);
+}
+
+.sheet-options-modal{
+    position: absolute;
+    background-color: white;
+    box-shadow : 0 8px 16px 0 lightgray;
+    bottom: 5.2vh;
+    /* left : 200px; */
+}
+
+.option{
+    padding: 7px 15px;
+}
+.option:hover{
+    background-color: lightgray;
+    cursor: default;
+}
+
+.scroller{
+    font-size: 26px;
+}
+
+.scroller:hover{
+    cursor: pointer;
+    background-color: lightgray;
+}
+
+.sheet-modal-parent{
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    top:0;
+    background-color: rgba(80, 68, 68, 0.459);
+    display : flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sheet-rename-modal, .sheet-delete-modal{
+    background-color: white;
+    box-shadow : 0 8px 16px 0 rgb(43, 42, 42);
+    padding: 15px;
+    min-width: 400px;
+    width: 30vw;
+    /* height: 30vh; */
+}
+
+.sheet-modal-title{
+    text-align: center;
+    font-size: 26px;
+    color: #217346;
+    font-weight: bolder;
+}
+
+.sheet-modal-input-container{
+    padding: 20px;
+}
+
+.sheet-modal-input-title{
+    display: block;
+    font-weight: bolder;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.sheet-modal-input{
+    width: 100%;
+    height: 2rem;
+    font-size: 1.2rem;
+    outline-color: #217346;
+}
+
+.sheet-modal-confirmation{
+    display : flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 15px;
+}
+
+.button{
+    border: 1px solid;
+    width: 100px;
+    height: 40px;
+    display : flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.yes-button{
+    border-radius: 5px;
+    background-color: #217346;
+    color: white;
+}
+.no-button{
+    border-radius: 5px;
+}
+
+.yes-button:hover{
+    background-color: #1b613b;
+}
+
+.delete-icon{
+    color: white;
+    margin-right: 5px;
+}
+.sheet-modal-warning-container{
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.rename-error{
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.file-modal{
+    position: absolute;
+    width: 0vw;
+    height: 100vh;
+    /* background-color: white; */
+    display: flex;
+}
+
+.options-menu{
+    height: 100%;
+    width: 15%;
+    background-color: #217346;
+}
+
+.recent-files{
+    height: 100%;
+    width: 35%;
+    background-color: white;
+}
+.file-transparent{
+    height: 100%;
+    width: 50%;
+}
+
+.close, .new, .open, .save{
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    margin: 3% 0;
+    width: 100%;
+    font-size: 20px;
+    justify-content: center;
+    font-size: 1.2rem;
+    position : relative;
+}
+
+.close-icon, .new-icon, .open-icon, .save-icon{
+    position: absolute;
+    color: white;
+    left: 1.5rem;
+}
+
+.close-icon{
+    transform: rotate(90deg);
+}
+.close:hover, .new:hover, .open:hover,.save:hover{
+    background-color: #1b613b;
+    cursor: pointer;
+}
+
+.close{
+    margin: 20px 0;
+}
