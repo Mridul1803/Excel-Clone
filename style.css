@@ -345,6 +345,7 @@ body{
     min-width: 400px;
     width: 30vw;
     /* height: 30vh; */
+    border-radius: 10px;
 }
 
 .sheet-modal-title{
@@ -398,8 +399,13 @@ body{
 }
 .no-button{
     border-radius: 5px;
+    background-color: rgb(199, 48, 48);
+    color: white;
 }
 
+.no-button:hover{
+    background-color: rgb(243, 45, 45);
+}
 .yes-button:hover{
     background-color: #1b613b;
 }
