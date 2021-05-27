@@ -3,6 +3,10 @@ const ps = new PerfectScrollbar('#cells', {
     wheelPropagation: true
 });
 
+//cut copy paste
+//scroll - updown
+//formula
+
 for(let i=1; i<100; ++i)
 {
     let str = "";
@@ -19,7 +23,7 @@ for(let i=1; i<100; ++i)
             n =Math.floor(n/26);
         }
     }
-    $('#columns').append(`<div class = "column-name">${str}</div>`);
+    $('#columns').append(`<div class = "column-name column-${i}" id="${str}">${str}</div>`);
     $("#rows").append( `<div class="row-name">${i}</div>`);
 }
 
@@ -41,7 +45,10 @@ let defaultProperties =  {
     "italic" : false,
     "alignment" : 'left',
     "color" : "#444",
-    "bgcolor" : "#fff"
+    "bgcolor" : "#fff",
+    "formula" : "",
+    "upstream": [],
+    "downStream" : []
 };
 
 for(let i=1; i<=100; i++)
@@ -69,6 +76,7 @@ $(".input-cell").dblclick(function(e){
 $(".input-cell").blur( function(e){
     $(this).attr("contenteditable", "false");
     updateCellData("text", $(this).text());
+    console.log(cellData);
 })
 
 function getRowCol(ele){
@@ -203,7 +211,8 @@ function changeHeader([rowId, colId]){
     $('#font-family').val(data['font-family']);
     $('#font-size').val(data['font-size']);
     $('#font-family').css( 'font-family', data['font-family'] );
-
+    $("#fill-color").css("border-bottom", `4px solid ${data.bgcolor}`);
+    $("#text-color").css("border-bottom", `4px solid ${data.color}`);
 }
 
 function addRemoveSelectFromFontStyle(data, property){
@@ -389,10 +398,11 @@ $(".pick-color").colorPick({
             if( $(this.element.children()[1]).attr('id') == 'fill-color' ){
                 $('.input-cell.selected').css( 'background-color', this.color );
                 $('#fill-color').css("border-bottom", `4px solid ${this.color}`)
+                updateCellData("bgcolor", this.color);
             }else{
                 $('.input-cell.selected').css( 'color', this.color );
                 $('#text-color').css("border-bottom", `4px solid ${this.color}`)
-
+                updateCellData('color', this.color);
             }
         }
 
@@ -413,13 +423,13 @@ function updateCellData( property, value){
             let [row, col] = getRowCol(data);
             if( cellData[selectedSheet][row-1] == undefined ){
                 cellData[selectedSheet][row-1] = {};
-                cellData[selectedSheet][row-1][col-1] = {...defaultProperties};
+                cellData[selectedSheet][row-1][col-1] = {...defaultProperties, "upStream":[], "downStream":[]};
                 cellData[selectedSheet][row-1][col-1][property] = value;
             }
             else{
                 if( cellData[selectedSheet][row-1][col-1] == undefined ){
                     // cellData[selectedSheet][row-1][col-1] = {};
-                    cellData[selectedSheet][row-1][col-1] = {...defaultProperties};
+                    cellData[selectedSheet][row-1][col-1] = {...defaultProperties, "upStream":[], "downStream":[]};
                     cellData[selectedSheet][row-1][col-1][property] = value;
                 }
                 else{
@@ -595,7 +605,7 @@ function loadCurrentSheet(){
             cell.css( {
                 "font-family" : data[i][j]['font-family'],
                 "font-size" : data[i][j]['font-size'],
-                "background-color" : data[i][j]['bg-color'],
+                "background-color" : data[i][j]['bgcolor'],
                 'color' : data[i][j].color,
                 'font-weight' : data[i][j].bold ? "bold" : "",
                 'font-style': data[i][j].italic ? "italic" : "",
@@ -631,7 +641,7 @@ function renameSheet(){
     else{
         $('.rename-error').remove();
         $('.sheet-modal-input-container').append(`
-        <div class='rename-error' >Sheet name is not valid or sheet already exists !!</div>`);
+        <div class='rename-error'>Sheet name is not valid or sheet already exists !!</div>`);
     }
 }
 
@@ -694,7 +704,7 @@ $('#menu-file').click(function(){
     fileModal.animate({
         width : '100vw'
     }, 500);
-    $('.close, .file-transparent, .save').click( function(e){
+    $('.close, .file-transparent, .save, .open').click( function(e){
         fileModal.remove();
     } )
 
@@ -733,6 +743,11 @@ $('#menu-file').click(function(){
         if(!saved)
             saveFile();
     })
+
+    $('.open').click(function(){
+        openFile();
+    })
+
 });
 
 function newFile(){
@@ -777,3 +792,221 @@ function saveFile(newClicked){
         }
     } )                          
 }
+
+function openFile(){
+    let inputFile = $(`<input type="file" />` );
+    $('.container').append(inputFile);
+    inputFile.click();
+    console.log('hello');
+    
+    inputFile.change(function(e){
+        console.log(e);
+
+        let file = e.target.files[0];
+        $('.title').text(file.name.split(".json")[0]);
+        let reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = () => {
+            cellData = JSON.parse(reader.result);
+            $('.sheet-tab').remove();
+            
+            let sheets = Object.keys(cellData);
+            for( let i of sheets){
+                if( i.includes('Sheet') ){
+                    let splittedSheetArray = i.split("Sheet");
+                    if( splittedSheetArray.length==2 && !isNaN(splittedSheetArray[1]) ){
+                        lastlyAddedSheet = parseInt(splittedSheetArray[1]);
+                    }
+                }
+                $('.sheet-tab-container').append(`<div class='sheet-tab selected' >${i}</div>`);
+            }
+            addSheetEvents();
+            $(".sheet-tab").removeClass('selected');
+            $( $('.sheet-tab')[0] ).addClass('selected');
+            selectedSheet = sheets[0];
+            totalSheets = sheets.length;
+            lastlyAddedSheet = totalSheets;
+            loadCurrentSheet();
+            inputFile.remove();        
+        }
+    })
+
+}
+
+let clipboard = { startCell:[], cellData:{} };
+let isContentCut = false;
+$(".copy, .cut").click(function(){
+    clipboard = { startCell:[], cellData:{} }
+    clipboard.startCell = getRowCol( $('.input-cell.selected')[0] );
+
+    $(".input-cell.selected").each(function(index, data){
+        let [row, col] = getRowCol(data);
+        if( cellData[selectedSheet][row-1] && cellData[selectedSheet][row-1][col-1] ){
+            if(!clipboard.cellData[row]){
+                clipboard.cellData[row] = {};
+            }
+            clipboard.cellData[row][col] = {...cellData[selectedSheet][row-1][col-1]}
+        }
+    })
+
+    if($(this).text() == 'content_cut')
+    {
+        isContentCut = true;
+    }
+} )
+
+$('.paste').click(function(){
+
+    if(isContentCut){
+        emptyPreviousSheet();
+    }
+
+    let startCell = getRowCol( $('.input-cell.selected')[0] );
+    for(let i of Object.keys(clipboard.cellData) )
+    {
+        let cols = Object.keys(clipboard.cellData[i]);
+        for( let j of cols ){
+
+            if(isContentCut){
+                delete cellData[selectedSheet][i-1][j-1];
+                if(Object.keys(cellData[selectedSheet][i-1]).length == 0 ){
+                    delete cellData[selectedSheet][i-1];
+                }
+            }
+        }
+    }
+
+    for( let i of Object.keys(clipboard.cellData))
+    {
+        let cols = Object.keys(clipboard.cellData[i]);
+        for(let j of cols)
+        {
+            let rd = parseInt(i) - parseInt(clipboard.startCell[0]);
+                let cd = parseInt(j) - parseInt(clipboard.startCell[1]);
+                if(!cellData[selectedSheet][startCell[0] + rd-1]){
+                    cellData[selectedSheet][startCell[0] + rd-1] = {};
+                }
+                cellData[selectedSheet][startCell[0] + rd-1][startCell[1]+cd-1] = {...clipboard.cellData[i][j]};
+        }
+    }
+
+    loadCurrentSheet();
+    if(isContentCut){
+        isContentCut=false;
+        clipboard = { startCell:[], cellData:{} };
+    }
+    
+})
+
+// $("#formula-input").blur(function(e){
+//     if( $(".input-cell.selected").length>0 ){
+//         let formula = $(this).text();
+//         let tempElements = formula.split(" ");
+//         let elements = [];
+//         for(let i of tempElements){
+//             if(i.length >= 2){
+//                 i = i.replace( "(","");
+//                 i = i.replace( ")","");
+//                 if( !elements.includes(i) )
+//                     elements.push(i);
+//             }
+//         }
+//         $('.input-cell.selected').each( function(index, data){
+            
+//             if(updateStreams(data, elements)){
+
+//             }else{
+//                 alert("Formula invalid");
+//             }
+//         } )
+        
+//     }else{
+//         alert("Please select a cell !!");
+//     }
+// })
+
+// function updateStreams(ele, elements){
+//     let [row, col] = getRowCol(ele);
+
+//     if(cellData[selectedSheet][row-1] && cellData[selectedSheet][row-1][col-1] ){
+//         let downStream = cellData[selectedSheet][row-1][col-1].downStream;
+//         for(let i of downStream){
+//             let [calRow, calCol] = codeToValue(i);
+//             if( !updateStreams( $(`#row-${calRow}-col-${calCol}`)[0], elements ) ){
+//                 return false;
+//             }
+//         }
+//     }
+
+//     let selfColCode = $(`.column-${col}`).attr("id");
+//     if(elements.includes(selfColCode + row)){
+//         return false;
+//     }
+
+//     if( !cellData[selectedSheet][row-1] ){
+//         cellData[selectedSheet][row-1] = {};  
+//         cellData[selectedSheet][row-1][col-1] = { ...defaultProperties, "upStream":[...elements], "downStream":[] };  
+//     }
+//     else if( !cellData[selectedSheet][row-1][col-1] ){
+//         cellData[selectedSheet][row-1][col-1] = { ...defaultProperties, "upStream":[...elements], "downStream":[] };
+//     }
+//     else{
+//         let downStream = cellData[selectedSheet][row-1][col-1].downStream;
+
+//         for(let j of downStream){
+//             if( elements.includes(j) )
+//                 return false;
+//         }
+
+//         let upstream = cellData[selectedSheet][row-1][col-1].upstream;
+//         for(let i of upstream){
+//             let [calRow, calCol] = codeToValue(i);
+//             let index = cellData[selectedSheet][calRow-1][calCol-1].downStream.indexOf(selfColCode+row)
+//             cellData[selectedSheet][calRow-1][calCol-1].downStream.splice(index, 1);
+//             if( JSON.stringify(cellData[selectedSheet][calRow-1][calCol-1]) == JSON.stringify(defaultProperties) ){
+//                 delete cellData[selectedSheet][calRow-1][calCol-1];
+//                 if( Object.keys(cellData[selectedSheet][calRow-1]).length==0 )
+//                     delete cellData[selectedSheet][calRow-1];
+//             }
+//         }
+
+//         cellData[selectedSheet][row-1][col-1].upstream = [...elements];
+//     }
+    
+//     for(let i of elements){
+//         let [calRow, calCol] = codeToValue(i);
+
+//         if( !cellData[selectedSheet][calRow-1] ){
+//             cellData[selectedSheet][calRow-1] = {};  
+//             cellData[selectedSheet][calRow-1][calCol-1] = { ...defaultProperties, "upStream":[...elements], "downStream":[selfColCode+row] };  
+//         }
+//         else if( !cellData[selectedSheet][calRow-1][calCol-1] ){
+//             cellData[selectedSheet][calRow-1][calCol-1] = { ...defaultProperties, "upStream":[...elements], "downStream":[selfColCode+row] };
+//         }
+//         else{
+//             if( !cellData[selectedSheet][calRow-1][calCol-1].downStream.includes(selfColCode+row) ){
+//                 cellData[selectedSheet][calRow-1][calCol-1].downStream.push(selfColCode+row)
+//             }
+//         }
+//     }
+
+//     return true;
+// }
+
+// function codeToValue(code){
+//     let colCode = "";
+//     let rowCode = "";
+//     for(let i=0; i<code.length; ++i){
+//         if( !isNaN(code.charAt(i) ) ){
+//             rowCode += code.charAt(i);
+//         }
+//         else{
+//             colCode += code.charAt(i);
+//         }
+//     }
+//     let colId = parseInt( $(`#${colCode}`).attr('class').split(" ")[1].split("-")[1] );
+//     let rowId = parseInt(rowCode);
+
+//     return [rowId, colId];
+// }
+
