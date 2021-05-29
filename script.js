@@ -3,10 +3,6 @@ const ps = new PerfectScrollbar('#cells', {
     wheelPropagation: true
 });
 
-//cut copy paste
-//scroll - updown
-//formula
-
 for(let i=1; i<100; ++i)
 {
     let str = "";
@@ -226,6 +222,13 @@ function changeHeader([rowId, colId]){
     $("#fill-color").css("border-bottom", `4px solid ${data.bgcolor}`);
     $("#text-color").css("border-bottom", `4px solid ${data.color}`);
     $('#formula-input').text(data.formula);
+
+    if( $('.input-cell.selected').length > 0 )
+    {
+        let [row, col] = getRowCol( $('.input-cell.selected')[0]);
+        // let startCell = $('.input-cell.selected')[0];
+        $('#selected-cell').text( $(`.column-${col}`).attr('id') + row );
+    }
 }
 
 function addRemoveSelectFromFontStyle(data, property){
